@@ -44,15 +44,10 @@ public class ClientEcho {
 
 
 
-        System.exit(0);
-        out.close();
-        input.close();
-        socket.close();
-
         String line = "";
         while ((!line.equals("Over") || loggedIn))  {
             try {
-                line = input.readLine();
+                line = scan.nextLine();
                 out.writeUTF(line);
             } catch (IOException i) {
                 System.out.println(i);
