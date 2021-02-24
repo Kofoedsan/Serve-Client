@@ -26,7 +26,6 @@ public class ServerEcho {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
 
-//            String loginData = "Bobby:123";
             String loginData = in.readUTF();
             String username = loginData.split(":")[0];
             String pass = loginData.split(":")[1];
