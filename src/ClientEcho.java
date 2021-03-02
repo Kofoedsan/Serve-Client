@@ -2,67 +2,110 @@ import java.net.*;
 import java.io.*;
 import java.util.Scanner;
 
-public class ClientEcho {
-    private Socket socket = null;
-    private DataInputStream input = null;
-    private DataOutputStream out = null;
+public class ClientEcho
+{
+    private Socket socket            = null;
+    private DataInputStream  input   = null;
+    private DataOutputStream out     = null;
+    private boolean loggedIn = false;
 
     // constructor to put ip address and port
     public ClientEcho(String address, int port) throws IOException {
-        try {
+        try
+        {
             socket = new Socket(address, port);
             System.out.println("Connected");
-            input = new DataInputStream(socket.getInputStream());
-            out = new DataOutputStream(socket.getOutputStream());
-        } catch (UnknownHostException u) {
+            input  = new DataInputStream(socket.getInputStream());
+            out    = new DataOutputStream(socket.getOutputStream());
+        }
+        catch(UnknownHostException u)
+        {
             System.out.println(u);
-        } catch (IOException i) {
+        }
+        catch(IOException i)
+        {
             System.out.println(i);
         }
 
-        //Login
-        Scanner scan = new Scanner(System.in);
-        String user = scan.nextLine();
-        String pass = scan.nextLine();
+        Scanner scanner = new Scanner(System.in);
 
-        out.writeUTF(user + ":" + pass);
+        // forsøge at logge ind her....
+
+        System.out.print("Username: ");
+        String user = scanner.nextLine(); // tag imod brugernavn
+
+        System.out.print("Password: ");
+        String pass = scanner.nextLine(); // tag imod password
+
+        // send til server
+        out.writeUTF(user+":"+pass);
+
+        // modtag svar fra server
+       /*
+           w:Velkommen...
+           t:userId
+           e:Forkert...
+       */
 
         String loginResponse = input.readUTF();
         String loginToken;
-        boolean loggedIn = false;
 
-        if (loginResponse.contains("w:")) {
-            loggedIn = true;
+        // er dette en velkomst besked???
+        if(loginResponse.contains("w:")) {
             loginToken = input.readUTF();
-            System.out.println(loginResponse);
-            System.out.println(loginToken);
+            loggedIn = true;
         }
-        if (loginResponse.contains("e:")) {
-            loggedIn = false;
+
+        // er dette forkert login???
+        if(loginResponse.contains("e:")) {
             System.out.println(loginResponse.split(":")[1]);
         }
 
+       /*
+       Tråd eksempel
+       Thread sendMessage = new Thread(new Runnable()
+       {
+           @Override
+           public void run() {
+               while (true) {
 
+               }
+           }
+       });
+       */
 
         String line = "";
-        while ((!line.equals("Over") || loggedIn))  {
-            try {
-                line = scan.nextLine();
-                out.writeUTF(line);
-            } catch (IOException i) {
+        while (!line.equals("Over") || loggedIn)
+        {
+            try
+            {
+                String cmd = scanner.nextLine();
+                out.writeUTF(cmd);
+
+                line = input.readUTF();
+                System.out.println(line);
+            }
+            catch(IOException i)
+            {
                 System.out.println(i);
             }
         }
-        try {
+
+        try
+        {
             input.close();
             out.close();
             socket.close();
-        } catch (IOException i) {
+        }
+        catch(IOException i)
+        {
             System.out.println(i);
         }
     }
 
     public static void main(String args[]) throws IOException {
-        ClientEcho clientEcho = new ClientEcho("127.0.0.1", 5000);
+        ClientEcho client = new ClientEcho("127.0.0.1", 5000);
     }
+
 }
+
